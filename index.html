@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+	html,body{margin:0;padding:0;}
+	.title{
+		font-size: 30px;
+		height: 100px;
+		line-height: 100px;
+		text-align: center;
+	}
+	#box{
+		width: 1000px;
+		margin:0 auto 50px;
+	}
+	#box ul{
+		overflow:hidden;
+		list-style: none;
+		margin:0;
+		padding:5px;
+		box-sizing: border-box;
+		font-size: 0;
+	}
+	#box ul li{
+		float: left;
+		width: 205px;
+		font-size: 12px;
+		box-shadow: 0 0 5px #ccc;
+		padding: 5px;
+		margin: 10px;
+	}
+	#box ul li img{
+		width: 100%;
+		opacity: 0;
+		/*margin-bottom: 5px;*/
+		transition:all 1s;
+	}
+	
+
+
+	</style>
+</head>
+<body>
+
+<div class="title">原生JS图片懒加载（瀑布流）</div>
+
+<div id="box">
+	<ul>
+		<li></li>
+		<li></li>
+		<li></li>
+		<li></li>
+	</ul>
+</div>
+
+<script>
+//假设ajax每一次获取12个图片
+var imgs = [
+	{src:"images/1.jpg"},
+	{src:"images/2.jpg"},
+	{src:"images/3.jpg"},
+	{src:"images/4.jpg"},
+	{src:"images/5.jpg"},
+	{src:"images/6.jpg"},
+	{src:"images/7.jpg"},
+	{src:"images/8.jpg"},
+	{src:"images/9.jpg"},
+	{src:"images/10.jpg"},
+	{src:"images/11.jpg"},
+	{src:"images/12.jpg"}
+];
+
+var loadimg = (function(){
+	var oBox = document.getElementById('box'),
+	    ind = 0, //累加器---分页，每页12个图片
+	    total;
+
+	return {
+		//加载图片
+		load:function(){
+			var oImg = new Image();//创建oImg
+			oImg.src = imgs[ind%imgs.length].src;
+			oImg.style.opacity = '0';
+			this.shortLi().appendChild(oImg);
+			setTimeout(function(){
+				oImg.style.opacity = '1';
+				oImg = null;//清除oImg
+			},1);			
+			
+		},
+		//计算哪一个li高度最小
+		shortLi:function(){
+			var oUl  = oBox.children[0],
+			    oLi  = oUl.children,
+	            minH = Infinity,//无限高
+	            curLi;
+	        	for(var i=0;i<oLi.length;i++){
+					if(oLi[i].offsetHeight < minH){
+						minH = oLi[i].offsetHeight;
+						curLi = oLi[i];
+					}
+			    }
+			    return curLi;	
+		},
+		//滚动事件
+		autoload:function(){
+			if(ind<12){
+				for(;ind<12;ind++){
+					this.load();
+				}
+			}else{
+				total = ind;
+				for(;ind<total+1;ind++){
+					this.load();
+				}
+			}
+		}
+	}
+})();
+//第一次加载(加载第一页)
+loadimg.autoload();
+//滚动加载
+window.onscroll = function(){
+	var sH = document.documentElement.clientHeight, //浏览器可视高度
+	    docH = document.body.clientHeight, //文档内容高度
+	    scrH = document.documentElement.scrollTop; //滚动高度
+	if(scrH+sH+50 > docH){//当滚动到底时加载新图片
+		loadimg.autoload();
+	}
+}
+
+</script>
+
+	
+</body>
+</html>
