@@ -13,7 +13,7 @@
 	}
 	#box{
 		width: 1000px;
-		margin:0 auto 50px;
+		margin:0 auto;
 	}
 	#box ul{
 		overflow:hidden;
@@ -28,24 +28,21 @@
 		width: 205px;
 		font-size: 12px;
 		box-shadow: 0 0 5px #ccc;
-		padding: 5px;
-		margin: 10px;
+		padding: 8px;
+		margin: 6px;
 	}
 	#box ul li img{
 		width: 100%;
+		height:auto;
 		opacity: 0;
-		/*margin-bottom: 5px;*/
+		margin-bottom: 5px;
 		transition:all 1s;
 	}
-	
-
-
+	.bot{height: 500px;}
 	</style>
 </head>
 <body>
-
 <div class="title">原生JS图片懒加载（瀑布流）</div>
-
 <div id="box">
 	<ul>
 		<li></li>
@@ -54,26 +51,27 @@
 		<li></li>
 	</ul>
 </div>
-
+<div class="bot" id="bot"></div>
 <script>
 //假设ajax每一次获取12个图片
 var imgs = [
-	{src:"images/1.jpg"},
-	{src:"images/2.jpg"},
-	{src:"images/3.jpg"},
-	{src:"images/4.jpg"},
-	{src:"images/5.jpg"},
-	{src:"images/6.jpg"},
-	{src:"images/7.jpg"},
-	{src:"images/8.jpg"},
-	{src:"images/9.jpg"},
-	{src:"images/10.jpg"},
-	{src:"images/11.jpg"},
-	{src:"images/12.jpg"}
+	{src:"images/1.jpg","title":"贝克汉姆"},
+	{src:"images/2.jpg","title":"清纯小主"},
+	{src:"images/3.jpg","title":"靓丽都市美女"},
+	{src:"images/4.jpg","title":"张学友演唱会"},
+	{src:"images/5.jpg","title":"韩女星金泰洙"},
+	{src:"images/6.jpg","title":"景甜美丽动人"},
+	{src:"images/7.jpg","title":"郊游自驾游"},
+	{src:"images/8.jpg","title":"范冰冰的不变妆容"},
+	{src:"images/9.jpg","title":"韩国男星XXX"},
+	{src:"images/10.jpg","title":"汤姆库鲁斯"},
+	{src:"images/11.jpg","title":"小甜甜布兰妮"},
+	{src:"images/12.jpg","title":"这眼神自己体会"}
 ];
-
+//单例模式
 var loadimg = (function(){
 	var oBox = document.getElementById('box'),
+		pageCount = 12,//假设每页12个图片
 	    ind = 0, //累加器---分页，每页12个图片
 	    total;
 
@@ -81,7 +79,9 @@ var loadimg = (function(){
 		//加载图片
 		load:function(){
 			var oImg = new Image();//创建oImg
-			oImg.src = imgs[ind%imgs.length].src;
+			var img = imgs[ind%imgs.length];
+			oImg.src = img.src; //设置图片路径
+			oImg.title = img.title;
 			oImg.style.opacity = '0';
 			this.shortLi().appendChild(oImg);
 			setTimeout(function(){
@@ -104,10 +104,10 @@ var loadimg = (function(){
 			    }
 			    return curLi;	
 		},
-		//滚动事件
+		//
 		autoload:function(){
-			if(ind<12){
-				for(;ind<12;ind++){
+			if(ind<pageCount){
+				for(;ind<pageCount;ind++){
 					this.load();
 				}
 			}else{
@@ -123,10 +123,12 @@ var loadimg = (function(){
 loadimg.autoload();
 //滚动加载
 window.onscroll = function(){
-	var sH = document.documentElement.clientHeight, //浏览器可视高度
+	var bot = document.getElementById('bot'),
+		botT = bot.offsetTop,
+	    sH = document.documentElement.clientHeight, //浏览器可视高度
 	    docH = document.body.clientHeight, //文档内容高度
-	    scrH = document.documentElement.scrollTop; //滚动高度
-	if(scrH+sH+50 > docH){//当滚动到底时加载新图片
+	    scrH = document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop; //滚动高度(兼容性问题)
+	if(scrH+sH >= botT){
 		loadimg.autoload();
 	}
 }
